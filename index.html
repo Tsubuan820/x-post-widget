@@ -65,6 +65,7 @@
         }
         .textarea-container {
             position: relative;
+            width: 100%;
         }
         .textarea {
             background-color: transparent;
@@ -77,6 +78,7 @@
             min-height: 80px;
             transition: color 0.3s ease;
             padding-right: 30px;
+            width: 100%;
         }
         .textarea:focus {
             outline: none;
@@ -93,15 +95,17 @@
             color: var(--reset-btn-text);
             border: none;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: background-color 0.2s ease;
             opacity: 0.8;
+            z-index: 10;
+            margin: 4px;
         }
         .reset-button:hover {
             background-color: var(--reset-btn-hover);
@@ -230,7 +234,7 @@
             </div>
         </div>
         
-        <div class="textarea-container mb-4">
+        <div class="textarea-container mb-4 relative">
             <textarea id="postText" class="textarea w-full p-1" placeholder="テキストを入力..."></textarea>
             <button id="resetBtn" class="reset-button" title="テキストをクリア">×</button>
         </div>
@@ -291,6 +295,18 @@
             const container = document.querySelector('.container');
             const resetBtn = document.getElementById('resetBtn');
 
+            // リセットボタンの表示/非表示
+            function updateResetButtonVisibility() {
+                if (postTextArea.value.length > 0) {
+                    resetBtn.style.display = 'flex';
+                } else {
+                    resetBtn.style.display = 'none';
+                }
+            }
+
+            // 初期状態ではリセットボタンを非表示
+            updateResetButtonVisibility();
+
             // リセットボタン
             resetBtn.addEventListener('click', function() {
                 postTextArea.value = '';
@@ -299,6 +315,7 @@
                 resultContainer.classList.add('hidden');
                 postTextArea.style.height = 'auto';
                 postTextArea.focus();
+                updateResetButtonVisibility();
             });
 
             // ダークモードの切り替え
@@ -330,6 +347,8 @@
                 autoResize(this);
                 const length = this.value.length;
                 charCount.textContent = length;
+                
+                updateResetButtonVisibility();
                 
                 if (length > 280) {
                     charCount.style.color = '#f4212e';
@@ -405,7 +424,7 @@
             postTextArea.focus();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94114dc872afd5c8',t:'MTc0NzQ2NTkxOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94115a6cd1bb7372',t:'MTc0NzQ2NjQzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
 <!-- partial -->
   
