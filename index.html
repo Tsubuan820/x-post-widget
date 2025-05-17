@@ -28,6 +28,9 @@
             --copy-btn-hover: #f0f0f0;
             --toggle-bg: #ccc;
             --toggle-active: #1d9bf0;
+            --reset-btn: #e0e0e0;
+            --reset-btn-hover: #d0d0d0;
+            --reset-btn-text: #606060;
         }
         
         .dark-mode {
@@ -42,6 +45,9 @@
             --copy-btn-hover: #2d3133;
             --toggle-bg: #3e4144;
             --toggle-active: #6e767d;
+            --reset-btn: #333639;
+            --reset-btn-hover: #3e4144;
+            --reset-btn-text: #e7e9ea;
         }
         
         body {
@@ -57,6 +63,9 @@
             border-radius: 12px;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
+        .textarea-container {
+            position: relative;
+        }
         .textarea {
             background-color: transparent;
             border: none;
@@ -67,6 +76,7 @@
             height: auto;
             min-height: 80px;
             transition: color 0.3s ease;
+            padding-right: 30px;
         }
         .textarea:focus {
             outline: none;
@@ -74,6 +84,28 @@
         }
         .textarea::placeholder {
             color: var(--placeholder-color);
+        }
+        .reset-button {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: var(--reset-btn);
+            color: var(--reset-btn-text);
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            opacity: 0.8;
+        }
+        .reset-button:hover {
+            background-color: var(--reset-btn-hover);
+            opacity: 1;
         }
         .url-display {
             white-space: nowrap;
@@ -198,7 +230,10 @@
             </div>
         </div>
         
-        <textarea id="postText" class="textarea w-full mb-4 p-1" placeholder="テキストを入力..."></textarea>
+        <div class="textarea-container mb-4">
+            <textarea id="postText" class="textarea w-full p-1" placeholder="テキストを入力..."></textarea>
+            <button id="resetBtn" class="reset-button" title="テキストをクリア">×</button>
+        </div>
         
         <div id="resultContainer" class="hidden">
             <div class="flex items-center mt-3 mb-2">
@@ -254,6 +289,17 @@
             const charCount = document.getElementById('charCount');
             const darkModeToggle = document.getElementById('darkModeToggle');
             const container = document.querySelector('.container');
+            const resetBtn = document.getElementById('resetBtn');
+
+            // リセットボタン
+            resetBtn.addEventListener('click', function() {
+                postTextArea.value = '';
+                charCount.textContent = '0';
+                charCount.style.color = '';
+                resultContainer.classList.add('hidden');
+                postTextArea.style.height = 'auto';
+                postTextArea.focus();
+            });
 
             // ダークモードの切り替え
             darkModeToggle.addEventListener('change', function() {
@@ -359,7 +405,7 @@
             postTextArea.focus();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94112b3cc0820af0',t:'MTc0NzQ2NDUwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94114dc872afd5c8',t:'MTc0NzQ2NTkxOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
 <!-- partial -->
   
