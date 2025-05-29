@@ -127,6 +127,7 @@
             transition: all 0.2s ease;
             position: relative;
             overflow: hidden;
+            cursor: pointer;
         }
         .x-button:hover {
             background-color: var(--button-hover);
@@ -221,7 +222,7 @@
             <div class="flex items-center">
                 <div class="text-sm mr-4" style="color: var(--text-color)">
                     <span id="charCount">0</span>
-                    <span style="opacity: 0.7">/280</span>
+                    <span style="opacity: 0.7">/140</span>
                 </div>
                 <div class="flex items-center">
                     <span class="mr-2 text-xs">🌞</span>
@@ -244,7 +245,6 @@
                 <div class="flex-1 px-3 py-2 text-sm url-display" id="urlDisplay">
                     https://twitter.com/intent/tweet?text=
                 </div>
-                <input type="hidden" id="generatedUrl">
                 <button id="copyBtn" class="p-2 rounded-md copy-btn transition-colors ml-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" style="color: var(--text-color)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -274,9 +274,9 @@
                 </div>
             </div>
 
-            <a id="openPostLink" href="#" target="_blank" class="block w-full x-button font-medium py-2.5 px-4 rounded-md text-center text-sm">
+            <button id="openPostBtn" class="block w-full x-button font-medium py-2.5 px-4 rounded-md text-center text-sm">
                 Xで投稿画面を開く
-            </a>
+            </button>
         </div>
     </div>
 
@@ -284,16 +284,44 @@
         document.addEventListener('DOMContentLoaded', function() {
             const postTextArea = document.getElementById('postText');
             const resultContainer = document.getElementById('resultContainer');
-            const generatedUrlInput = document.getElementById('generatedUrl');
             const urlDisplay = document.getElementById('urlDisplay');
             const copyBtn = document.getElementById('copyBtn');
             const copyMessage = document.getElementById('copyMessage');
-            const openPostLink = document.getElementById('openPostLink');
+            const openPostBtn = document.getElementById('openPostBtn');
             const previewText = document.getElementById('previewText');
             const charCount = document.getElementById('charCount');
             const darkModeToggle = document.getElementById('darkModeToggle');
             const container = document.querySelector('.container');
             const resetBtn = document.getElementById('resetBtn');
+            
+            const MAX_CHAR_COUNT = 280; // 実際の制限（バイト数）
+            const DISPLAY_MAX = 140;    // 表示用の制限（全角文字数）
+
+            // 文字数カウント関数（全角は2文字としてカウント）
+            function countCharacters(str) {
+                let count = 0;
+                for (let i = 0; i < str.length; i++) {
+                    // 全角文字は2文字としてカウント
+                    if (str.charCodeAt(i) > 255) {
+                        count += 2;
+                    } else {
+                        count += 1;
+                    }
+                }
+                return count;
+            }
+            
+            // 表示用の文字数カウント（全角文字を基準に表示）
+            function displayCharCount(str) {
+                const actualCount = countCharacters(str);
+                // 実際のカウントを全角文字基準に変換（280の半分=140が基準）
+                return Math.ceil(actualCount / 2);
+            }
+
+            // テキストの前後の空白を削除する関数
+            function trimText(text) {
+                return text.trim();
+            }
 
             // リセットボタンの表示/非表示
             function updateResetButtonVisibility() {
@@ -345,32 +373,29 @@
 
             postTextArea.addEventListener('input', function() {
                 autoResize(this);
-                const length = this.value.length;
-                charCount.textContent = length;
+                // 文字数カウントは元のテキストで行う
+                const actualCharLength = countCharacters(this.value);
+                const displayLength = displayCharCount(this.value);
+                charCount.textContent = displayLength;
                 
                 updateResetButtonVisibility();
                 
-                if (length > 280) {
+                if (actualCharLength > MAX_CHAR_COUNT) {
                     charCount.style.color = '#f4212e';
                 } else {
                     charCount.style.color = '';
                 }
                 
-                // URLを自動生成
-                const postText = this.value;
-                if (postText.trim()) {
-                    const encodedText = encodeURIComponent(postText);
-                    const postUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
-                    
-                    // 完全なURLを隠しフィールドに保存
-                    generatedUrlInput.value = postUrl;
-                    
-                    // 表示用のURLは短縮して表示（最初の20文字だけ表示）
-                    const displayText = postText.length > 20 ? postText.substring(0, 20) + '...' : postText;
+                // 修正点1: 前後の空白を削除したテキストを使用
+                const trimmedText = trimText(this.value);
+                
+                if (trimmedText) {
+                    // 修正点2: 表示用のURLは短縮して表示（最初の20文字だけ表示）
+                    const displayText = trimmedText.length > 20 ? trimmedText.substring(0, 20) + '...' : trimmedText;
                     urlDisplay.textContent = `https://twitter.com/intent/tweet?text=${displayText}`;
                     
-                    openPostLink.href = postUrl;
-                    previewText.textContent = postText;
+                    // 修正点3: プレビューテキストもtrim後のテキストを表示
+                    previewText.textContent = trimmedText;
                     
                     if (resultContainer.classList.contains('hidden')) {
                         resultContainer.classList.remove('hidden');
@@ -385,26 +410,40 @@
                     resultContainer.classList.add('hidden');
                 }
             });
+            
+            // 修正点4: 投稿ボタンをクリックしたときの処理
+            openPostBtn.addEventListener('click', function() {
+                // 入力テキストを取得し、余分な空白を削除
+                const trimmedText = trimText(postTextArea.value);
+                
+                // URLを生成してXの投稿画面を開く
+                const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(trimmedText)}`;
+                window.open(tweetUrl, '_blank');
+            });
 
-            // コピーボタン
+            // 修正点5: コピーボタン
             copyBtn.addEventListener('click', async function() {
+                // 入力テキストを取得し、余分な空白を削除
+                const trimmedText = trimText(postTextArea.value);
+                const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(trimmedText)}`;
+                
                 if (navigator.clipboard && window.isSecureContext) {
                     try {
-                        await navigator.clipboard.writeText(generatedUrlInput.value);
+                        await navigator.clipboard.writeText(url);
                         showCopyMessage();
                     } catch (err) {
-                        fallbackCopyMethod();
+                        fallbackCopyMethod(url);
                     }
                 } else {
-                    fallbackCopyMethod();
+                    fallbackCopyMethod(url);
                 }
             });
             
             // フォールバックのコピー方法
-            function fallbackCopyMethod() {
+            function fallbackCopyMethod(text) {
                 // 一時的に表示して選択できるようにする
                 const tempInput = document.createElement('input');
-                tempInput.value = generatedUrlInput.value;
+                tempInput.value = text;
                 document.body.appendChild(tempInput);
                 tempInput.select();
                 document.execCommand('copy');
@@ -424,7 +463,7 @@
             postTextArea.focus();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94115a6cd1bb7372',t:'MTc0NzQ2NjQzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9472c412b3e825fe',t:'MTc0ODQ4Nzg4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
 <!-- partial -->
   
